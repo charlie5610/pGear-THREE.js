@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+        <script src="js/three.js"></script>
+		<script type="module">
+			const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/GLTFLoader.js';
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            document.body.appendChild( renderer.domElement );
+            const loader = new GLTFLoader();
+            var gear = new THREE.Object3D();
+            var ring = new THREE.Object3D();
+            var inputS = new THREE.Object3D();
+            var carrier = new THREE.Object3D();
+            var target = new THREE.Vector3();
+            var mouseX = 0, mouseY = 0;
+
+            var windowHalfX = window.innerWidth / 2;
+            var windowHalfY = window.innerHeight / 2;
+            var P = [];
+            for(var i = 0; i<3; i++){
+                P[i] = new THREE.Object3D();
+            }
+            var iSpeed = 0.01;
+            
+            
+            
+            const light = new THREE.PointLight( 0xff0000, 50, 10 );
+            const light2 = new THREE.PointLight( 0xff0000, 50, 10 );
+            light.position.set( 0, -1, 2 );
+//            light2.position.set( 0,10 , 0 );
+            scene.add( light );
+//            scene.add( light2 );
+            scene.background= new THREE.Color(0xffffff)
+            
+            loader.load(
+                // resource URL
+                "assets/asset.glb",
+
+                // onLoad callback
+                // Here the loaded data is assumed to be an object
+                function ( obj ) {
+                    // Add the loaded object to the scene
+                    scene.add( obj.scene );
+                    
+                    obj.scene.scale.multiplyScalar(0.07)
+                    obj.scene.rotateX(Math.PI/2)
+                    inputS = obj.scene.children[0];
+                    for(var i = 0; i<3; i++){
+                        P[i] = obj.scene.children[2].children[i];
+                        P[i].material.color={r: 0, g: 1, b: 0, isColor: true}
+                        P[i].material.emissive = {r:0, g: 0.3, b: 0 , isColor: true}
+                    }
+                    inputS.children[0].material.color={r: 1, g: 0, b: 0, isColor: true}
+                    inputS.children[0].material.emissive = {r:0.2, g: 0, b: 0 , isColor: true}
+                    ring = obj.scene.children[1];
+                    gear = obj.scene
+                    obj.scene.children[1].material.color={r: 0, g: 0, b: 0, isColor: true}
+                    obj.scene.children[1].material.emissive = {r: 138/255, g: 138/255, b: 138/255, isColor: true}
+                    inputS.material.color={r: 0, g: 0, b: 0, isColor: true}
+                    inputS.material.emissive = {r: 138/255, g: 138/255, b: 138/255, isColor: true}
+           
+                    console.log(P)
+                },
+            );
+            camera.position.z = 5;
+            
+            renderer.render( scene, camera );
+            function animate() {
+                requestAnimationFrame( animate );
+                inputS.rotation.y += iSpeed;
+                for(var i = 0; i<3; i++){
+                        P[i].rotation.x += iSpeed/2;
+                }
+                ring.rotation.y -= iSpeed/5
+                renderer.render( scene, camera );
+                
+                
+            }
+            function onDocumentMouseMove() {
+                mouseX = ( event.clientX - windowHalfX );
+                mouseY = ( event.clientY - windowHalfY );
+                target.x = ( mouseX - target.x ) * .05;
+                target.y = ( - mouseY - target.y ) * .05;
+                target.z = camera.position.z; // assuming the camera is located at ( 0, 0, z );
+
+                gear.lookAt( target );
+                gear.rotateX(Math.PI/2)
+                renderer.render( scene, camera );
+            }
+            function speedUp(){
+                iSpeed = iSpeed*4;                
+            }
+            function slowDown(){
+                iSpeed = iSpeed/4;
+                gear.lookAt( new THREE.Vector3(0,0,1) );
+                gear.rotateX(Math.PI/2)
+                renderer.render( scene, camera );
+            }
+            
+            document.addEventListener("mouseover",speedUp)
+            document.addEventListener("mousemove",onDocumentMouseMove)
+            document.addEventListener("mouseout",slowDown)
+            animate();
+		</script>
+	</body>
+</html>
