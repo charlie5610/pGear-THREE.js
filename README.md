@@ -1,0 +1,1 @@
+This is a desktop version of the planetary gear, with a fixed speed and configuration. Object moves to point at cursor.
